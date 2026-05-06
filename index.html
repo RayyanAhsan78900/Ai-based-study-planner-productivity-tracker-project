@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>StudyFlow — AI Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">⚡</span>
+    <span class="logo-text">StudyFlow</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">🏠</span><span>Dashboard</span>
+    </a>
+    <a href="#" class="nav-item" data-page="planner">
+      <span class="nav-icon">📅</span><span>Planner</span>
+    </a>
+    <a href="#" class="nav-item" data-page="tasks">
+      <span class="nav-icon">✅</span><span>Tasks</span>
+    </a>
+    <a href="#" class="nav-item" data-page="pomodoro">
+      <span class="nav-icon">🍅</span><span>Pomodoro</span>
+    </a>
+    <a href="#" class="nav-item" data-page="analytics">
+      <span class="nav-icon">📊</span><span>Analytics</span>
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+      <span id="themeIcon">☀️</span>
+    </button>
+    <button class="export-btn" onclick="exportPDF()">📄 Export PDF</button>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <button class="menu-toggle" id="menuToggle">☰</button>
+    <div class="topbar-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-right">
+      <span class="date-badge" id="currentDate"></span>
+      <div class="avatar">SF</div>
+    </div>
+  </header>
+
+  <!-- ===== DASHBOARD PAGE ===== -->
+  <section class="page active" id="page-dashboard">
+    <div class="page-header">
+      <h1>Good morning! <span class="wave">👋</span></h1>
+      <p>Here's your study overview for today.</p>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent:#6ee7b7">
+        <div class="stat-icon">📚</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statSubjects">0</span>
+          <span class="stat-label">Subjects</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#93c5fd">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statTasks">0</span>
+          <span class="stat-label">Total Tasks</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#fca5a5">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statHours">0h</span>
+          <span class="stat-label">Study Hours</span>
+        </div>
+      </div>
+      <div class="stat-card" style="--accent:#f9a8d4">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-info">
+          <span class="stat-value" id="statStreak">0</span>
+          <span class="stat-label">Day Streak</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Productivity Score + Today's Tasks -->
+    <div class="dashboard-row">
+      <!-- Circular Score -->
+      <div class="card score-card">
+        <h3>Productivity Score</h3>
+        <div class="circle-progress-wrap">
+          <svg class="circle-svg" viewBox="0 0 120 120">
+            <circle class="circle-bg" cx="60" cy="60" r="52"/>
+            <circle class="circle-fill" cx="60" cy="60" r="52" id="scoreCircle"/>
+          </svg>
+          <div class="circle-center">
+            <span class="score-number" id="scoreNumber">0</span>
+            <span class="score-label">/ 100</span>
+          </div>
+        </div>
+        <div class="score-breakdown">
+          <div class="breakdown-item">
+            <span class="dot" style="background:#6ee7b7"></span>
+            <span id="completedCount">0 Completed</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="dot" style="background:#fca5a5"></span>
+            <span id="pendingCount">0 Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Tasks -->
+      <div class="card today-card">
+        <div class="card-header">
+          <h3>Today's Tasks</h3>
+          <button class="btn-sm" onclick="showPage('tasks')">View All</button>
+        </div>
+        <div class="today-tasks" id="todayTasks">
+          <div class="empty-state">No tasks yet. Add some subjects!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subject Progress Bars -->
+    <div class="card">
+      <h3>Subject Progress</h3>
+      <div id="subjectProgressList" class="subject-progress-list">
+        <div class="empty-state">Add subjects to see progress here.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PLANNER PAGE ===== -->
+  <section class="page" id="page-planner">
+    <div class="page-header">
+      <h1>Weekly Planner 📅</h1>
+      <p>Your AI-generated study schedule.</p>
+    </div>
+
+    <!-- Add Subject Form -->
+    <div class="card form-card">
+      <h3>➕ Add Subject</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Subject Name</label>
+          <input type="text" id="subjectName" placeholder="e.g. Mathematics" />
+        </div>
+        <div class="form-group">
+          <label>Difficulty</label>
+          <select id="subjectDifficulty">
+            <option value="1">Easy</option>
+            <option value="2" selected>Medium</option>
+            <option value="3">Hard</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deadline</label>
+          <input type="date" id="subjectDeadline" />
+        </div>
+        <div class="form-group">
+          <label>Study Hours/Day</label>
+          <input type="number" id="subjectHours" placeholder="e.g. 2" min="0.5" max="10" step="0.5"/>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addSubject()">Add Subject & Generate Plan</button>
+    </div>
+
+    <!-- Weekly Calendar -->
+    <div class="card">
+      <h3>📆 This Week</h3>
+      <div class="weekly-calendar" id="weeklyCalendar"></div>
+    </div>
+  </section>
+
+  <!-- ===== TASKS PAGE ===== -->
+  <section class="page" id="page-tasks">
+    <div class="page-header">
+      <h1>Task Manager ✅</h1>
+      <p>Manage and track all your study tasks.</p>
+    </div>
+
+    <div class="task-filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="pending">Pending</button>
+      <button class="filter-btn" data-filter="completed">Completed</button>
+    </div>
+
+    <div class="tasks-grid" id="tasksGrid">
+      <div class="empty-state">No tasks yet. Add subjects in the Planner!</div>
+    </div>
+  </section>
+
+  <!-- ===== POMODORO PAGE ===== -->
+  <section class="page" id="page-pomodoro">
+    <div class="page-header">
+      <h1>Pomodoro Timer 🍅</h1>
+      <p>Focus 25 minutes. Rest 5 minutes. Repeat.</p>
+    </div>
+    <div class="pomodoro-wrap">
+      <div class="card pomodoro-card">
+        <div class="pomo-mode-btns">
+          <button class="pomo-mode active" data-time="1500" id="btnFocus">Focus</button>
+          <button class="pomo-mode" data-time="300" id="btnBreak">Short Break</button>
+          <button class="pomo-mode" data-time="900" id="btnLong">Long Break</button>
+        </div>
+
+        <div class="pomo-ring">
+          <svg viewBox="0 0 200 200" class="pomo-svg">
+            <circle cx="100" cy="100" r="88" class="pomo-bg-ring"/>
+            <circle cx="100" cy="100" r="88" class="pomo-progress-ring" id="pomoRing"/>
+          </svg>
+          <div class="pomo-display">
+            <div class="pomo-time" id="pomoTime">25:00</div>
+            <div class="pomo-label" id="pomoLabel">Focus Time</div>
+          </div>
+        </div>
+
+        <div class="pomo-controls">
+          <button class="pomo-btn" id="pomoStart" onclick="togglePomodoro()">▶ Start</button>
+          <button class="pomo-btn pomo-reset" onclick="resetPomodoro()">↺ Reset</button>
+        </div>
+
+        <div class="pomo-sessions">
+          <span>Sessions today: <strong id="pomoSessions">0</strong></span>
+          <div class="session-dots" id="sessionDots"></div>
+        </div>
+      </div>
+
+      <div class="card pomo-tips">
+        <h3>💡 Pomodoro Tips</h3>
+        <ul class="tips-list">
+          <li>Remove all distractions before starting</li>
+          <li>Work on ONE task per session</li>
+          <li>Take your breaks seriously</li>
+          <li>After 4 sessions, take a 15–30 min break</li>
+          <li>Track what you accomplished each session</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ANALYTICS PAGE ===== -->
+  <section class="page" id="page-analytics">
+    <div class="page-header">
+      <h1>Analytics 📊</h1>
+      <p>Track your study patterns and performance.</p>
+    </div>
+
+    <div class="analytics-grid">
+      <div class="card">
+        <h3>Weekly Activity</h3>
+        <div class="bar-chart" id="weeklyBarChart"></div>
+      </div>
+      <div class="card">
+        <h3>Subject Distribution</h3>
+        <div class="pie-chart-wrap">
+          <canvas id="pieChart" width="200" height="200"></canvas>
+          <div class="pie-legend" id="pieLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>AI Recommendations</h3>
+      <div id="aiRecommendations" class="recommendations-list">
+        <div class="empty-state">Add subjects to get personalized recommendations.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script src="js/app.js"></script>
+<script src="js/planner.js"></script>
+<script src="js/pomodoro.js"></script>
+<script src="js/charts.js"></script>
+</body>
+</html>
